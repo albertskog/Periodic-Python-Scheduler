@@ -9,7 +9,7 @@ class periodicTask:
 	def __init__(self, periodSec, task, taskArguments = (), repetitions = 0):
 
 		self.thread = threading.Thread(target = self.threadEntryPoint, 
-									   args = (periodSec, task, taskArguments, repetitions))
+			args = (periodSec, task, taskArguments, repetitions))
 		self.thread.start()
 
 
@@ -20,30 +20,31 @@ class periodicTask:
 		self.periodic(self.scheduler, periodSec, task, taskArguments)
 		self.scheduler.run()
 
-
 	def periodic(self, scheduler, delaySec, task, taskArguments):
 
 	  	# Schedule another recursive event
-	 	nextEvent = self.scheduler.enter(delaySec, 
-	 									 1, 
-	 									 self.periodic, 
-	 									 (self.scheduler, interval, task, taskArguments))
+	 	self.nextEvent = self.scheduler.enter(delaySec, 
+	 		1,
+	 		self.periodic,
+	 		(self.scheduler, delaySec, task, taskArguments))
 
 	 	# Do task and get return status
 		stopTask = task(*taskArguments)
 
 		# Stop task if it returned true
 	 	if (stopTask == True):
-			self.scheduler.cancel(nextEvent)
+			self.stop
 
 		self.repetitions = self.repetitions - 1
 
 		# Stop if we ran through all repetitions
 		# If repetitions was initialized to 0, run forever (or at least until integer underflow)
 		if (self.repetitions == 0):
-			self.scheduler.cancel(nextEvent)
+			self.stop()
 
-
+	def stop(self):
+		self.scheduler.cancel(self.nextEvent)
+		thread.exit()
 
 def testTask():
 
@@ -51,5 +52,9 @@ def testTask():
 
 	return False
 
-myTask = periodicTask(1, testTask, repetitions = 3)
+myTask = periodicTask(1, testTask, repetitions = 5)
+
+time.sleep(3)
+
+myTask.stop()
 
