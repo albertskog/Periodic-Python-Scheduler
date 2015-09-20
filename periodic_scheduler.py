@@ -46,15 +46,4 @@ class periodicTask:
 		self.scheduler.cancel(self.nextEvent)
 		thread.exit()
 
-def testTask():
-
-	print "Test"
-
-	return False
-
-myTask = periodicTask(1, testTask, repetitions = 5)
-
-time.sleep(3)
-
-myTask.stop()
 
